@@ -214,7 +214,6 @@
     }
     #toast.show { opacity: 1; }
 
-    /* Для больших экранов ПК */
     @media (min-width: 900px) {
       body { flex-direction: row; }
       #globe-container { flex: 1; height: 100dvh; border-bottom: none; border-right: 1px solid #21262d; }
@@ -272,7 +271,7 @@
 
 <script>
   /* ============================================================================
-     БАЗА СТРАН И ССЫЛОК (Без флагов и хэштегов — добавляй свои сайты по шаблону)
+     БАЗА СТРАН И ССЫЛОК (Без флагов и хэштегов)
      ============================================================================ */
   const MY_COUNTRIES_DB = {
     "Ukraine": {
@@ -434,7 +433,6 @@
     feedBox.innerHTML = renderRow({ name: `Лента новостей (${searchQuery})`, url: gNewsUrl });
   }
 
-  // Проверка, попадает ли контур (кольцо координат) в границы Крымского полуострова
   function isCrimeaPolygon(ring) {
     if (!Array.isArray(ring) || ring.length === 0) return false;
     let sumLng = 0, sumLat = 0;
@@ -447,7 +445,6 @@
     return avgLng >= 32.4 && avgLng <= 36.7 && avgLat >= 44.3 && avgLat <= 46.25;
   }
 
-  // Инициализация глобуса
   const container = document.getElementById("globe-container");
   const world = Globe()(container)
     .width(container.clientWidth)
@@ -481,25 +478,21 @@
   world.controls().autoRotate = true;
   world.controls().autoRotateSpeed = 0.4;
 
-  // Загрузка границ стран (исключаем Крым из РФ и закрепляем его за Украиной)
   fetch("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson")
     .then(res => res.json())
     .then(countries => {
       const ukraine = countries.features.find(f => f.properties.ADMIN === "Ukraine");
       const russia = countries.features.find(f => f.properties.ADMIN === "Russia");
 
-      // Удаляем отдельные полигоны Крыма из набора данных, если они идут отдельным объектом
       countries.features = countries.features.filter(f => {
         const name = (f.properties.NAME || "") + " " + (f.properties.ADMIN || "");
         return !name.toLowerCase().includes("crimea");
       });
 
-      // Вырезаем Крым из MultiPolygon России, если он там присутствует
       if (russia && russia.geometry && russia.geometry.type === "MultiPolygon") {
         russia.geometry.coordinates = russia.geometry.coordinates.filter(poly => !isCrimeaPolygon(poly[0]));
       }
 
-      // Подгружаем точный международно признанный контур Украины с Крымом
       fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries/UKR.geo.json")
         .then(r => r.json())
         .then(ukrGeo => {

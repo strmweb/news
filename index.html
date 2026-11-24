@@ -72,7 +72,7 @@
     }
 
     #sidebar {
-      width: 480px;
+      width: 490px;
       max-width: 100vw;
       background: #0d1117;
       border-left: 1px solid #21262d;
@@ -128,7 +128,8 @@
       align-items: center;
     }
 
-    .sites-list {
+    /* Ссылки на сайты */
+    .sites-grid {
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -137,7 +138,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 12px;
+      padding: 9px 12px;
       border-radius: 8px;
       text-decoration: none;
       font-size: 13px;
@@ -158,6 +159,35 @@
     .site-alt:hover { background: rgba(217, 119, 6, 0.3); color: #fff; }
     .site-domain { font-size: 11px; opacity: 0.7; font-weight: 400; }
 
+    /* Карточки новостей */
+    .news-card {
+      background: #161b22;
+      border: 1px solid #262c36;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .news-title {
+      color: #f0f6fc;
+      text-decoration: none;
+      font-size: 13px;
+      line-height: 1.4;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .news-title:hover { color: #38bdf8; }
+    .news-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .btn-tg-small {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
     /* Черновик */
     .tg-composer {
       padding: 12px 16px;
@@ -167,7 +197,7 @@
     }
     #tg-draft {
       width: 100%;
-      height: 75px;
+      height: 70px;
       background: #0d1117;
       border: 1px solid #30363d;
       border-radius: 8px;
@@ -207,8 +237,8 @@
 
     @media (max-width: 850px) {
       body { flex-direction: column; }
-      #globe-container { height: 35vh; flex: none; }
-      #sidebar { width: 100%; height: 65vh; border-left: none; border-top: 1px solid #30363d; }
+      #globe-container { height: 32vh; flex: none; }
+      #sidebar { width: 100%; height: 68vh; border-left: none; border-top: 1px solid #30363d; }
     }
   </style>
 </head>
@@ -231,22 +261,25 @@
   </div>
 
   <div class="workspace-scroll">
-    <!-- 1. Официальные сайты -->
+    <!-- 1. Последние новости страны -->
     <div class="section-box">
-      <div class="section-title"><span>🏛 Официальные / Родные СМИ</span></div>
-      <div class="sites-list" id="official-sites-list"></div>
-    </div>
-
-    <!-- 2. Альтернативные -->
-    <div class="section-box">
-      <div class="section-title"><span>🔍 Альтернативные СМИ</span></div>
-      <div class="sites-list" id="alt-sites-list"></div>
-    </div>
-
-    <div class="section-box" style="background:rgba(2,132,199,0.08);border-color:rgba(56,189,248,0.2);">
-      <div style="font-size:12px;color:#94a3b8;line-height:1.4;">
-        💡 <b>Как работать:</b> Кликай по сайту выше ↗, копируй нужную новость и вставляй в черновик ниже. Добавляй хэштег страны и публикуй в свой Telegram!
+      <div class="section-title">
+        <span>⚡️ Последние новости (Сводка)</span>
+        <span id="feed-status" style="font-weight:400;font-size:11px;">Загрузка...</span>
       </div>
+      <div id="news-feed-container"></div>
+    </div>
+
+    <!-- 2. Официальные сайты -->
+    <div class="section-box">
+      <div class="section-title"><span>🏛 Официальные / Родные сайты СМИ</span></div>
+      <div class="sites-grid" id="official-sites-list"></div>
+    </div>
+
+    <!-- 3. Альтернативные сайты -->
+    <div class="section-box">
+      <div class="section-title"><span>🔍 Альтернативные источники</span></div>
+      <div class="sites-grid" id="alt-sites-list"></div>
     </div>
   </div>
 
@@ -270,6 +303,7 @@
     "Ukraine": {
       ruName: "🇺🇦 Украина",
       hashtag: "#Украина",
+      query: "Ukraine",
       official: [
         { name: "Укрінформ", url: "https://www.ukrinform.ua/" },
         { name: "Суспільне Новини", url: "https://suspilne.media/" },
@@ -285,6 +319,7 @@
     "France": {
       ruName: "🇫🇷 Франция",
       hashtag: "#Франция",
+      query: "France",
       official: [
         { name: "AFP (Агентство)", url: "https://www.afp.com/fr" },
         { name: "France Info", url: "https://www.francetvinfo.fr/" },
@@ -299,6 +334,7 @@
     "Germany": {
       ruName: "🇩🇪 Германия",
       hashtag: "#Германия",
+      query: "Germany",
       official: [
         { name: "Tagesschau", url: "https://www.tagesschau.de/" },
         { name: "Der Spiegel", url: "https://www.spiegel.de/" }
@@ -311,6 +347,7 @@
     "United States of America": {
       ruName: "🇺🇸 США",
       hashtag: "#США",
+      query: "United States",
       official: [
         { name: "Associated Press", url: "https://apnews.com/" },
         { name: "NPR News", url: "https://www.npr.org/" }
@@ -324,6 +361,7 @@
     "United Kingdom": {
       ruName: "🇬🇧 Британия",
       hashtag: "#Британия",
+      query: "United Kingdom",
       official: [
         { name: "BBC News UK", url: "https://www.bbc.co.uk/news" },
         { name: "Sky News", url: "https://news.sky.com/" }
@@ -336,6 +374,7 @@
     "Poland": {
       ruName: "🇵🇱 Польша",
       hashtag: "#Польша",
+      query: "Poland",
       official: [
         { name: "PAP (Агентство)", url: "https://www.pap.pl/" },
         { name: "TVN24", url: "https://tvn24.pl/" }
@@ -349,6 +388,7 @@
   const GLOBAL_DB = {
     ruName: "🌍 Мировые СМИ",
     hashtag: "#Мир",
+    query: "world economy geopolitics",
     official: [
       { name: "Reuters", url: "https://www.reuters.com/" },
       { name: "Associated Press", url: "https://apnews.com/" },
@@ -375,16 +415,14 @@
     try { return new URL(url).hostname.replace("www.", ""); } catch { return "сайт"; }
   }
 
-  // Отрисовка ссылок для выбранной страны
-  function renderCountryLinks() {
+  // Главная функция обновления интерфейса для выбранной страны
+  function updateEditorPanel() {
     const officialBox = document.getElementById("official-sites-list");
     const altBox = document.getElementById("alt-sites-list");
     const titleEl = document.getElementById("current-region");
     const tagEl = document.getElementById("current-hashtag");
 
     let data = null;
-    
-    // Ищем страну независимо от регистра букв в её названии на карте
     const matchedKey = selectedCountry ? Object.keys(MY_COUNTRIES_DB).find(k => k.toLowerCase() === selectedCountry.toLowerCase()) : null;
 
     if (!selectedCountry) {
@@ -392,11 +430,11 @@
     } else if (matchedKey) {
       data = MY_COUNTRIES_DB[matchedKey];
     } else {
-      // Универсальный шаблон для любой другой страны мира, если её нет в твоем списке
       const q = encodeURIComponent(selectedCountry);
       data = {
         ruName: `📍 ${selectedCountry}`,
         hashtag: `#${selectedCountry.replace(/[^a-zA-Zа-яА-Я0-9]/g, "")}`,
+        query: selectedCountry,
         official: [
           { name: `Google News (${selectedCountry})`, url: `https://news.google.com/search?q=${q}` },
           { name: `Reuters (${selectedCountry})`, url: `https://www.reuters.com/site-search/?query=${q}` }
@@ -411,6 +449,7 @@
     titleEl.textContent = data.ruName;
     tagEl.textContent = data.hashtag;
 
+    // 1. Рендерим ссылки на сайты
     officialBox.innerHTML = data.official.map(site => `
       <a class="site-link site-official" href="${site.url}" target="_blank" rel="noopener">
         <span>${site.name}</span>
@@ -424,6 +463,56 @@
         <span class="site-domain">${getDomain(site.url)} ↗</span>
       </a>
     `).join("");
+
+    // 2. Загружаем свежие новости по этой стране
+    fetchLiveNews(data.query, data.hashtag);
+  }
+
+  // Подгрузка новостей через открытый GDELT API
+  async function fetchLiveNews(queryStr, hashtag) {
+    const feedBox = document.getElementById("news-feed-container");
+    const statusEl = document.getElementById("feed-status");
+
+    statusEl.textContent = "Загрузка...";
+    feedBox.innerHTML = `<div style="font-size:12px;color:#8b949e;padding:6px;text-align:center;">Ищем последние события...</div>`;
+
+    try {
+      const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(queryStr)}&mode=artlist&maxrecords=8&format=json&sort=datedesc`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data.articles || data.articles.length === 0) {
+        statusEl.textContent = "Нет свежих сводок";
+        feedBox.innerHTML = `<div style="font-size:12px;color:#8b949e;padding:6px;">Используйте ссылки на сайты СМИ выше ↗ для чтения новостей.</div>`;
+        return;
+      }
+
+      statusEl.textContent = `Сводки: ${data.articles.length}`;
+      feedBox.innerHTML = "";
+
+      data.articles.forEach(art => {
+        const div = document.createElement("div");
+        div.className = "news-card";
+        div.innerHTML = `
+          <div style="font-size:10px;color:#8b949e;margin-bottom:4px;">${art.domain || "News"}</div>
+          <a class="news-title" href="${art.url}" target="_blank" rel="noopener">${art.title}</a>
+          <div class="news-actions">
+            <button class="btn-tg-small">📋 Копировать для TG</button>
+          </div>
+        `;
+
+        div.querySelector(".btn-tg-small").addEventListener("click", () => {
+          const post = `⚡️ ${art.title}\n\n🔗 ${art.url}\n\n${hashtag}`;
+          navigator.clipboard.writeText(post);
+          showToast("✅ Пост скопирован для Telegram!");
+        });
+
+        feedBox.appendChild(div);
+      });
+    } catch (e) {
+      statusEl.textContent = "Ошибка сети";
+      feedBox.innerHTML = `<div style="font-size:12px;color:#8b949e;padding:6px;">Не удалось загрузить ленту. Пользуйтесь ссылками на официальные сайты выше ↗</div>`;
+    }
   }
 
   // Инициализация 3D-глобуса
@@ -493,7 +582,7 @@
       const [minLng, minLat, maxLng, maxLat] = featureObj.bbox;
       world.pointOfView({ lat: (minLat + maxLat) / 2, lng: (minLng + maxLng) / 2, altitude: 1.4 }, 1000);
     }
-    renderCountryLinks();
+    updateEditorPanel();
   }
 
   function resetToGlobal() {
@@ -502,7 +591,7 @@
     world.polygonsData(world.polygonsData());
     document.getElementById("btn-world").classList.add("active");
     world.pointOfView({ altitude: 2.3 }, 1000);
-    renderCountryLinks();
+    updateEditorPanel();
   }
 
   document.getElementById("btn-world").addEventListener("click", resetToGlobal);
@@ -527,7 +616,7 @@
 
   document.getElementById("btn-clear").addEventListener("click", () => { document.getElementById("tg-draft").value = ""; });
 
-  renderCountryLinks();
+  updateEditorPanel();
 </script>
 </body>
 </html>

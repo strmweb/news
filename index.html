@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Глобус Новостей — Мировые и локальные СМИ</title>
   <script src="https://unpkg.com/globe.gl"></script>
-  <script src="https://unpkg.com/topojson-client@3"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -30,7 +29,7 @@
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
-      background: rgba(13, 17, 23, 0.85);
+      background: rgba(13, 17, 23, 0.88);
       backdrop-filter: blur(10px);
       padding: 10px 14px;
       border-radius: 12px;
@@ -60,7 +59,7 @@
       padding: 7px 12px;
       border-radius: 8px;
       font-size: 13px;
-      width: 190px;
+      width: 210px;
     }
     #sidebar {
       width: 440px;
@@ -206,18 +205,88 @@
 </div>
 
 <script>
-  // Настройки отображения и поисковые запросы для стран (используют стабильный открытый индекс GDELT API)
-  const COUNTRY_CONFIGS = {
-    "Ukraine": { ruName: "🇺🇦 Украина", query: "Ukraine" },
-    "United States of America": { ruName: "🇺🇸 США", query: "United States" },
-    "Germany": { ruName: "🇩🇪 Германия", query: "Germany" },
-    "United Kingdom": { ruName: "🇬🇧 Великобритания", query: "United Kingdom" },
-    "Poland": { ruName: "🇵🇱 Польша", query: "Poland" },
-    "France": { ruName: "🇫🇷 Франция", query: "France" },
-    "Japan": { ruName: "🇯🇵 Япония", query: "Japan" },
-    "China": { ruName: "🇨🇳 Китай", query: "China" },
-    "Canada": { ruName: "🇨🇦 Канада", query: "Canada" },
-    "Italy": { ruName: "🇮🇹 Италия", query: "Italy" }
+  const COUNTRY_SOURCES = {
+    "Ukraine": {
+      ruName: "🇺🇦 Украина",
+      nativeRSS: [
+        { name: "Суспільне", url: "https://suspilne.media/rss/all.rss" },
+        { name: "Укрінформ", url: "https://www.ukrinform.ua/rss/block-lastnews" },
+        { name: "РБК-Україна", url: "https://www.rbc.ua/static/rss/all.ukr.rss.xml" }
+      ],
+      altRSS: [
+        { name: "BBC News Україна", url: "https://feeds.bbci.co.uk/ukrainian/rss.xml" },
+        { name: "DW Україна", url: "https://rss.dw.com/xml/rss-uk-all" },
+        { name: "Радіо Свобода", url: "https://www.radiosvoboda.org/api/zrqiteuuir" }
+      ]
+    },
+    "United States of America": {
+      ruName: "🇺🇸 США",
+      nativeRSS: [
+        { name: "NPR News", url: "https://feeds.npr.org/1001/rss.xml" },
+        { name: "CBS News", url: "https://www.cbsnews.com/latest/rss/main" }
+      ],
+      altRSS: [
+        { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml" },
+        { name: "The Guardian US", url: "https://www.theguardian.com/us-news/rss" }
+      ]
+    },
+    "Germany": {
+      ruName: "🇩🇪 Германия",
+      nativeRSS: [
+        { name: "Tagesschau", url: "https://www.tagesschau.de/xml/rss2/" },
+        { name: "Der Spiegel", url: "https://www.spiegel.de/schlagzeilen/tops/index.rss" }
+      ],
+      altRSS: [
+        { name: "DW English", url: "https://rss.dw.com/xml/rss-en-ger" },
+        { name: "Euronews", url: "https://www.euronews.com/rss?level=theme&name=news" }
+      ]
+    },
+    "United Kingdom": {
+      ruName: "🇬🇧 Великобритания",
+      nativeRSS: [
+        { name: "BBC UK", url: "https://feeds.bbci.co.uk/news/uk/rss.xml" },
+        { name: "Sky News", url: "https://feeds.skynews.com/feeds/rss/uk.xml" }
+      ],
+      altRSS: [
+        { name: "The Independent", url: "https://www.independent.co.uk/news/uk/rss" },
+        { name: "France 24", url: "https://www.france24.com/en/europe/rss" }
+      ]
+    },
+    "Poland": {
+      ruName: "🇵🇱 Польша",
+      nativeRSS: [
+        { name: "TVN24", url: "https://tvn24.pl/najnowsze.xml" },
+        { name: "Polsat News", url: "https://www.polsatnews.pl/rss/wszystkie.xml" }
+      ],
+      altRSS: [
+        { name: "Notes From Poland", url: "https://notesfrompoland.com/feed/" },
+        { name: "DW Polska", url: "https://rss.dw.com/xml/rss-pl-all" }
+      ]
+    },
+    "France": {
+      ruName: "🇫🇷 Франция",
+      nativeRSS: [
+        { name: "Le Monde", url: "https://www.lemonde.fr/rss/une.xml" },
+        { name: "France Info", url: "https://www.francetvinfo.fr/titres.rss" }
+      ],
+      altRSS: [
+        { name: "RFI", url: "https://www.rfi.fr/fr/rss" },
+        { name: "France 24", url: "https://www.france24.com/fr/rss" }
+      ]
+    }
+  };
+
+  const GLOBAL_SOURCES = {
+    nativeRSS: [
+      { name: "BBC World", url: "https://feeds.bbci.co.uk/news/world/rss.xml" },
+      { name: "UN News (ООН)", url: "https://news.un.org/feed/subscribe/ru/news/all/rss.xml" },
+      { name: "Euronews", url: "https://ru.euronews.com/rss" }
+    ],
+    altRSS: [
+      { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml" },
+      { name: "DW Мир", url: "https://rss.dw.com/xml/rss-ru-all" },
+      { name: "RFI на русском", url: "https://www.rfi.fr/ru/rss" }
+    ]
   };
 
   let selectedCountry = null;
@@ -225,41 +294,40 @@
   let allLoadedArticles = [];
   let countdown = 30;
   let countriesFeatures = [];
+  let lastClickTime = 0;
 
- новостей через стабильный открытый API
-  async function fetchNewsAPI(queryStr) {
+  async function fetchRSS(feedObj, category) {
+    // 1. Попытка через rss2json
     try {
-      const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(queryStr)}&mode=artlist&maxrecords=25&format=json&sort=datedesc`;
-      const res = await fetch(url);
+      const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedObj.url)}`);
       const data = await res.json();
-      
-      if (!data.articles) return [];
+      if (data.status === "ok" && Array.isArray(data.items) && data.items.length > 0) {
+        return data.items.slice(0, 10).map(item => ({
+          title: item.title,
+          link: item.link,
+          source: feedObj.name,
+          category: category,
+          date: new Date(item.pubDate || Date.now())
+        }));
+      }
+    } catch (e) {}
 
-      return data.articles.map((art, idx) => ({
-        title: art.title || "Без заголовка",
-        link: art.url || "#",
-        source: art.domain || "Global News",
-        // Разделяем источники на местные (native) и международные (alt) по чётному/нечётному индексу
-        category: idx % 2 === 0 ? "native" : "alt",
-        date: art.seendate ? parseGdeltDate(art.seendate) : new Date()
+    // 2. Резерв через corsproxy.io
+    try {
+      const res2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(feedObj.url)}`);
+      const text = await res2.text();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, "text/xml");
+      const items = Array.from(xml.querySelectorAll("item")).slice(0, 10);
+      return items.map(el => ({
+        title: el.querySelector("title")?.textContent?.trim() || "Без заголовка",
+        link: el.querySelector("link")?.textContent?.trim() || "#",
+        source: feedObj.name,
+        category: category,
+        date: new Date(el.querySelector("pubDate")?.textContent || Date.now())
       }));
     } catch (e) {
-      console.warn("Ошибка загрузки потока:", e);
       return [];
-    }
-  }
-
-  function parseGdeltDate(str) {
-    try {
-      // Формат даты GDELT: YYYYMMDDTHHMMSSZ
-      const year = str.slice(0, 4);
-      const month = str.slice(4, 6) - 1;
-      const day = str.slice(6, 8);
-      const hour = str.slice(9, 11);
-      const min = str.slice(11, 13);
-      return new Date(Date.UTC(year, month, day, hour, min));
-    } catch {
-      return new Date();
     }
   }
 
@@ -267,22 +335,35 @@
     const countEl = document.getElementById("feed-count");
     countEl.textContent = "Обновление потоков...";
 
-    let query = "world economy geopolitics conflict technology";
-    if (selectedCountry) {
-      const cfg = COUNTRY_CONFIGS[selectedCountry];
-      query = cfg ? cfg.query : selectedCountry;
+    let tasks = [];
+
+    if (!selectedCountry) {
+      GLOBAL_SOURCES.nativeRSS.forEach(f => tasks.push(fetchRSS(f, "native")));
+      GLOBAL_SOURCES.altRSS.forEach(f => tasks.push(fetchRSS(f, "alt")));
+    } else {
+      const cfg = COUNTRY_SOURCES[selectedCountry];
+      if (cfg) {
+        cfg.nativeRSS.forEach(f => tasks.push(fetchRSS(f, "native")));
+        cfg.altRSS.forEach(f => tasks.push(fetchRSS(f, "alt")));
+      } else {
+        const gNewsNative = `https://news.google.com/rss/search?q=${encodeURIComponent(selectedCountry)}&hl=en&gl=US&ceid=US:en`;
+        const gNewsAlt = `https://news.google.com/rss/search?q=${encodeURIComponent(selectedCountry + " world OR analysis")}&hl=en&gl=GB&ceid=GB:en`;
+        tasks.push(fetchRSS({ name: `СМИ: ${selectedCountry}`, url: gNewsNative }, "native"));
+        tasks.push(fetchRSS({ name: `Международный взгляд`, url: gNewsAlt }, "alt"));
+      }
     }
 
-    const articles = await fetchNewsAPI(query);
+    const results = await Promise.all(tasks);
+    const merged = results.flat();
 
-    // Убираем дубликаты заголовков
     const seen = new Set();
-    allLoadedArticles = articles.filter(item => {
-      const key = item.title.toLowerCase().slice(0, 40);
+    allLoadedArticles = merged.filter(item => {
+      if (!item.title) return false;
+      const key = item.title.toLowerCase().slice(0, 45);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
-    });
+    }).sort((a, b) => b.date - a.date);
 
     renderNews();
   }
@@ -300,7 +381,7 @@
     listEl.innerHTML = "";
 
     if (filtered.length === 0) {
-      listEl.innerHTML = `<div style="color:#8b949e;padding:20px;text-align:center;">Загрузка свежих данных или нет материалов по фильтру...</div>`;
+      listEl.innerHTML = `<div style="color:#8b949e;padding:20px;text-align:center;">Загрузка заголовков или проверьте подключение к интернету...</div>`;
       return;
     }
 
@@ -313,8 +394,10 @@
 
       const isNative = item.category === "native";
       const badgeClass = isNative ? "tag-native" : "tag-alt";
-      const badgeLabel = isNative ? `Местное СМИ • ${item.source}` : `Международное • ${item.source}`;
-      const timeStr = item.date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+      const badgeLabel = isNative ? `Родное СМИ • ${item.source}` : `Альтернатива • ${item.source}`;
+      const timeStr = isNaN(item.date.getTime())
+        ? "Сегодня"
+        : item.date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
 
       card.innerHTML = `
         <div class="news-meta">
@@ -327,7 +410,7 @@
     });
   }
 
-  // Инициализация глобуса
+  // Инициализация 3D-глобуса
   const world = Globe()(document.getElementById("globe-container"))
     .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
     .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
@@ -344,11 +427,11 @@
       d.properties.ADMIN === selectedCountry ? "#38bdf8" : "rgba(148, 163, 184, 0.35)"
     )
     .polygonLabel(({ properties: d }) => {
-      const custom = COUNTRY_CONFIGS[d.ADMIN];
+      const custom = COUNTRY_SOURCES[d.ADMIN];
       return `
         <div style="background:rgba(13,17,23,0.92);padding:6px 10px;border-radius:6px;border:1px solid #38bdf8;font-size:13px;">
           <b>${custom ? custom.ruName : d.ADMIN}</b><br/>
-          <span style="color:#94a3b8;font-size:11px;">Кликните для выбора страны</span>
+          <span style="color:#94a3b8;font-size:11px;">Нажмите для открытия СМИ</span>
         </div>
       `;
     })
@@ -356,13 +439,17 @@
       selectCountry(polygon.properties.ADMIN, polygon);
     })
     .onGlobeClick(() => {
-      resetToGlobal();
+      const now = Date.now();
+      if (now - lastClickTime < 350) {
+        resetToGlobal();
+      }
+      lastClickTime = now;
     });
 
   world.controls().autoRotate = true;
-  world.controls().autoRotateSpeed = 0.4;
+  world.controls().autoRotateSpeed = 0.45;
 
-  // Загрузка контуров стран мира и исправление границ Крыма (Украина)
+  // Загрузка границ стран + Крым в составе Украины
   fetch("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson")
     .then(res => res.json())
     .then(countries => {
@@ -404,7 +491,7 @@
     world.controls().autoRotate = false;
     world.polygonsData(world.polygonsData());
 
-    const custom = COUNTRY_CONFIGS[countryName];
+    const custom = COUNTRY_SOURCES[countryName];
     document.getElementById("current-region").textContent = custom ? custom.ruName : `📍 ${countryName}`;
     document.getElementById("btn-world").classList.remove("active");
 
@@ -447,7 +534,6 @@
     });
   });
 
-  // Автообновление каждые 30 секунд
   setInterval(() => {
     countdown--;
     if (countdown <= 0) {

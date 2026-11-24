@@ -20,7 +20,7 @@
     /* Верхняя часть: 3D-планета */
     #globe-container {
       width: 100%;
-      height: 40dvh;
+      height: 38dvh;
       position: relative;
       flex-shrink: 0;
       border-bottom: 1px solid #21262d;
@@ -63,7 +63,7 @@
       font-size: 13px;
     }
 
-    /* Нижняя часть: Ссылки столбиком */
+    /* Нижняя часть */
     #panel {
       flex: 1;
       display: flex;
@@ -100,6 +100,12 @@
       gap: 14px;
     }
 
+    .section-card {
+      background: #131822;
+      border: 1px solid #262c36;
+      border-radius: 12px;
+      padding: 12px;
+    }
     .group-title {
       font-size: 11px;
       font-weight: 700;
@@ -109,24 +115,25 @@
       margin-bottom: 8px;
     }
 
+    /* Ссылки в столбик с гарантированной видимостью */
     .links-column {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-
     .link-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 13px 14px;
+      padding: 12px 14px;
       background: #161b22;
       border: 1px solid #2b323d;
-      border-radius: 10px;
+      border-radius: 9px;
       text-decoration: none;
       color: #f0f6fc;
       font-size: 14px;
+      min-height: 46px;
     }
     .link-row:active {
       background: #1e293b;
@@ -138,7 +145,7 @@
     }
     .link-url {
       color: #38bdf8;
-      font-size: 12.5px;
+      font-size: 12px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -159,8 +166,8 @@
 
 <div id="globe-container">
   <div id="top-bar">
-    <button id="btn-world" class="active">Весь мир</button>
-    <input type="text" id="country-search" placeholder="Найти страну (Ukraine, Russia, France...)" list="countries-datalist" />
+    <button id="btn-world" class="active">Все мир</button>
+    <input type="text" id="country-search" placeholder="Поиск страны (Ukraine, Russia...)" list="countries-datalist" />
     <datalist id="countries-datalist"></datalist>
   </div>
 </div>
@@ -172,12 +179,12 @@
   </div>
 
   <div class="scroll-area">
-    <div>
+    <div class="section-card">
       <div class="group-title">Официальные / Родные СМИ</div>
       <div class="links-column" id="official-links"></div>
     </div>
 
-    <div>
+    <div class="section-card">
       <div class="group-title">Альтернативные / Международные</div>
       <div class="links-column" id="alt-links"></div>
     </div>
@@ -186,7 +193,7 @@
 
 <script>
   /* ============================================================================
-     БАЗА СТРАН И ССЫЛОК (Добавляй свои страны и сайты сюда)
+     БАЗА СТРАН И ССЫЛОК (Можешь добавлять сюда любые свои сайты)
      ============================================================================ */
   const COUNTRIES_DB = {
     "Ukraine": {
@@ -328,16 +335,16 @@
         info = {
           name: countryKey,
           official: [
-            { title: "Reuters", url: `https://www.reuters.com/site-search/?query=${q}` },
-            { title: "Associated Press", url: `https://apnews.com/search?q=${q}` }
+            { title: "Google News", url: `https://news.google.com/search?q=${q}` },
+            { title: "Reuters Search", url: `https://www.reuters.com/site-search/?query=${q}` }
           ],
           alternative: [
-            { title: "BBC News", url: `https://www.bbc.co.uk/search?q=${q}` },
+            { title: "BBC Search", url: `https://www.bbc.co.uk/search?q=${q}` },
             { title: "Al Jazeera", url: `https://www.aljazeera.com/search/${q}` }
           ]
         };
       }
-      statusEl.textContent = "Ссылки открыты";
+      statusEl.textContent = "Ссылки активны";
     } else {
       statusEl.textContent = "Весь мир";
     }
@@ -348,7 +355,6 @@
     info.alternative.forEach(item => altBox.appendChild(makeLinkRow(item, true)));
   }
 
-  // Проверка координат Крыма, чтобы исключить его из полигона России
   function isCrimeaRing(ring) {
     if (!Array.isArray(ring) || ring.length === 0) return false;
     let lngSum = 0, latSum = 0;
@@ -361,7 +367,6 @@
     return lng >= 32.4 && lng <= 36.7 && lat >= 44.3 && lat <= 46.25;
   }
 
-  // Инициализация 3D-глобуса
   const container = document.getElementById("globe-container");
   const world = Globe()(container)
     .width(container.clientWidth)
@@ -389,7 +394,6 @@
   world.controls().autoRotate = true;
   world.controls().autoRotateSpeed = 0.4;
 
-  // Загрузка границ стран (Крым закреплён за Украиной и удалён у России)
   fetch("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson")
     .then(r => r.json())
     .then(data => {
@@ -457,7 +461,7 @@
     if (found) selectCountry(found.properties.ADMIN, found);
   });
 
-  // Сразу показываем мировые ссылки при старте
+  // Запуск при старте (показывает мировые ссылки)
   renderLinks(null);
 </script>
 </body>

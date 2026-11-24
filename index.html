@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TG News Radar — Каталог СМИ по странам</title>
+  <title>TG News Radar — Пульт редактора</title>
   <script src="https://unpkg.com/globe.gl"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,7 +16,6 @@
       overflow: hidden;
     }
 
-    /* Левая часть — 3D Земля */
     #globe-container {
       flex: 1;
       position: relative;
@@ -36,7 +35,7 @@
     }
     #top-bar > * { pointer-events: auto; }
     .glass-panel {
-      background: rgba(13, 17, 23, 0.9);
+      background: rgba(13, 17, 23, 0.92);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(56, 189, 248, 0.3);
       border-radius: 10px;
@@ -69,10 +68,9 @@
       padding: 7px 10px;
       border-radius: 8px;
       font-size: 13px;
-      width: 185px;
+      width: 170px;
     }
 
-    /* Правая (на телефоне — нижняя) панель редактора */
     #sidebar {
       width: 480px;
       max-width: 100vw;
@@ -93,10 +91,7 @@
       align-items: center;
       flex-shrink: 0;
     }
-    .region-title {
-      font-size: 18px;
-      font-weight: 700;
-    }
+    .region-title { font-size: 18px; font-weight: 700; color: #f0f6fc; }
     .country-tag-pill {
       font-size: 12px;
       background: rgba(56, 189, 248, 0.15);
@@ -106,14 +101,13 @@
       border: 1px solid rgba(56, 189, 248, 0.3);
     }
 
-    /* Прокручиваемая рабочая область: Сайты СМИ + Сводки */
     .workspace-scroll {
       flex: 1;
       overflow-y: auto;
       padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
 
     .section-box {
@@ -123,28 +117,28 @@
       padding: 12px;
     }
     .section-title {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.5px;
       color: #8b949e;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    /* Сетка кнопок-ссылок на официальные и альтернативные СМИ */
+    /* Гарантированное отображение сетки сайтов */
     .sites-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
-      gap: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
     .site-link {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 9px 12px;
+      padding: 10px 12px;
       border-radius: 8px;
       text-decoration: none;
       font-size: 13px;
@@ -152,31 +146,20 @@
       transition: 0.15s;
     }
     .site-official {
-      background: rgba(2, 132, 199, 0.16);
+      background: rgba(2, 132, 199, 0.15);
       color: #7dd3fc;
-      border: 1px solid rgba(56, 189, 248, 0.35);
+      border: 1px solid rgba(56, 189, 248, 0.3);
     }
-    .site-official:hover {
-      background: rgba(2, 132, 199, 0.32);
-      color: #fff;
-    }
+    .site-official:hover { background: rgba(2, 132, 199, 0.3); color: #fff; }
     .site-alt {
-      background: rgba(217, 119, 6, 0.16);
+      background: rgba(217, 119, 6, 0.15);
       color: #fcd34d;
-      border: 1px solid rgba(245, 158, 11, 0.35);
+      border: 1px solid rgba(245, 158, 11, 0.3);
     }
-    .site-alt:hover {
-      background: rgba(217, 119, 6, 0.32);
-      color: #fff;
-    }
-    .site-domain {
-      font-size: 10px;
-      opacity: 0.75;
-      font-weight: 400;
-      display: block;
-    }
+    .site-alt:hover { background: rgba(217, 119, 6, 0.3); color: #fff; }
+    .site-domain { font-size: 11px; opacity: 0.7; font-weight: 400; }
 
-    /* Лента последних событий (если RSS отдали данные) */
+    /* Лента */
     .news-item {
       padding: 10px;
       background: #161b22;
@@ -184,69 +167,54 @@
       border-radius: 8px;
       margin-bottom: 8px;
     }
-    .news-item:last-child { margin-bottom: 0; }
-    .news-item-top {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #8b949e;
-      margin-bottom: 5px;
-    }
     .news-item-title {
       color: #f0f6fc;
       text-decoration: none;
-      font-size: 13.5px;
-      line-height: 1.35;
+      font-size: 13px;
+      line-height: 1.4;
       display: block;
       margin-bottom: 8px;
     }
     .news-item-title:hover { color: #38bdf8; }
-    .news-actions {
-      display: flex;
-      gap: 6px;
-      justify-content: flex-end;
-    }
+    .news-actions { display: flex; gap: 6px; justify-content: flex-end; }
     .btn-tg-small {
       background: rgba(34, 197, 94, 0.15);
       color: #4ade80;
       border: 1px solid rgba(34, 197, 94, 0.35);
-      padding: 4px 9px;
+      padding: 4px 10px;
       font-size: 11px;
       font-weight: 600;
+      border-radius: 6px;
     }
 
-    /* Черновик поста для Telegram */
+    /* Черновик */
     .tg-composer {
-      padding: 10px 16px 12px;
+      padding: 12px 16px;
       background: #161b22;
       border-top: 1px solid #21262d;
       flex-shrink: 0;
     }
     #tg-draft {
       width: 100%;
-      height: 64px;
+      height: 60px;
       background: #0d1117;
       border: 1px solid #30363d;
       border-radius: 8px;
       color: #e6edf3;
       padding: 8px 10px;
-      font-size: 12.5px;
+      font-size: 12px;
       resize: none;
       font-family: inherit;
       margin-bottom: 6px;
     }
-    .composer-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
+    .composer-footer { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .btn-copy-main {
       background: #16a34a;
       border-color: #22c55e;
       color: #fff;
       font-weight: 600;
-      padding: 7px 14px;
+      padding: 7px 12px;
+      border-radius: 8px;
     }
 
     #toast {
@@ -255,7 +223,7 @@
       right: 16px;
       background: #16a34a;
       color: #fff;
-      padding: 9px 16px;
+      padding: 8px 14px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
@@ -266,12 +234,10 @@
     }
     #toast.show { opacity: 1; }
 
-    /* Адаптация под мобильный экран (как на твоём скриншоте) */
     @media (max-width: 850px) {
       body { flex-direction: column; }
-      #globe-container { height: 38vh; flex: none; }
-      #sidebar { width: 100%; height: 62vh; border-left: none; border-top: 1px solid #30363d; }
-      .sites-list { grid-template-columns: 1fr 1fr; }
+      #globe-container { height: 35vh; flex: none; }
+      #sidebar { width: 100%; height: 65vh; border-left: none; border-top: 1px solid #30363d; }
     }
   </style>
 </head>
@@ -294,266 +260,142 @@
   </div>
 
   <div class="workspace-scroll">
-    <!-- 1. Официальные сайты страны -->
+    <!-- 1. Официальные сайты -->
     <div class="section-box">
-      <div class="section-title">
-        <span>🏛 Официальные / Родные СМИ страны</span>
-      </div>
+      <div class="section-title"><span>🏛 Официальные / Родные СМИ</span></div>
       <div class="sites-list" id="official-sites-list"></div>
     </div>
 
-    <!-- 2. Альтернативные / Независимые / Международные -->
+    <!-- 2. Альтернативные -->
     <div class="section-box">
-      <div class="section-title">
-        <span>🔍 Альтернативные и международные СМИ</span>
-      </div>
+      <div class="section-title"><span>🔍 Альтернативные СМИ</span></div>
       <div class="sites-list" id="alt-sites-list"></div>
     </div>
 
-    <!-- 3. Лента последних заголовков (автоподгрузка) -->
+    <!-- 3. Лента -->
     <div class="section-box">
       <div class="section-title">
-        <span>⚡️ Последние события (лента)</span>
+        <span>⚡️ Лента событий</span>
         <span id="feed-status" style="font-weight:400;font-size:11px;">Загрузка...</span>
       </div>
       <div id="news-feed-container"></div>
     </div>
   </div>
 
-  <!-- Черновик поста для Telegram -->
   <div class="tg-composer">
-    <textarea id="tg-draft" placeholder="Вставь сюда текст новости с сайта или нажми «+ В черновик» ниже..."></textarea>
+    <textarea id="tg-draft" placeholder="Черновик для поста..."></textarea>
     <div class="composer-footer">
       <button id="btn-clear">Очистить</button>
-      <button id="btn-add-tag">+ Хэштег страны</button>
-      <button id="btn-copy-post" class="btn-copy-main">📋 Копировать пост в TG</button>
+      <button id="btn-add-tag">+ Хэштег</button>
+      <button id="btn-copy-post" class="btn-copy-main">📋 Копировать в TG</button>
     </div>
   </div>
 </div>
 
-<div id="toast">Скопировано в буфер!</div>
+<div id="toast">Скопировано!</div>
 
 <script>
-  /* ============================================================================
-     БАЗА СТРАН И ССЫЛОК (ЗДЕСЬ ТЫ МОЖЕШЬ ВРУЧНУЮ ДОБАВЛЯТЬ ЛЮБЫЕ СТРАНЫ И САЙТЫ)
-     Ключ страны (например "Ukraine", "France", "Germany") должен совпадать 
-     с английским названием страны на карте.
-     ============================================================================ */
+  /* БАЗА СТРАН И ССЫЛОК (Можешь вручную править и добавлять сюда сайты) */
   const MY_COUNTRIES_DB = {
     "Ukraine": {
       ruName: "🇺🇦 Украина",
       hashtag: "#Украина",
       official: [
-        { name: "Укрінформ (Гос. агентство)", url: "https://www.ukrinform.ua/" },
+        { name: "Укрінформ", url: "https://www.ukrinform.ua/" },
         { name: "Суспільне Новини", url: "https://suspilne.media/" },
-        { name: "РБК-Україна", url: "https://www.rbc.ua/" },
-        { name: "Інтерфакс-Україна", url: "https://interfax.com.ua/" }
+        { name: "РБК-Україна", url: "https://www.rbc.ua/" }
       ],
       alternative: [
         { name: "Українська правда", url: "https://www.pravda.com.ua/" },
-        { name: "BBC News Україна", url: "https://www.bbc.com/ukrainian" },
-        { name: "DW Українською", url: "https://www.dw.com/uk/" },
-        { name: "Радіо Свобода", url: "https://www.radiosvoboda.org/" },
-        { name: "Hromadske", url: "https://hromadske.ua/" }
+        { name: "BBC Україна", url: "https://www.bbc.com/ukrainian" },
+        { name: "Радіо Свобода", url: "https://www.radiosvoboda.org/" }
       ],
-      rss: [
-        "https://www.ukrinform.ua/rss/block-lastnews",
-        "https://suspilne.media/rss/all.rss"
-      ]
+      rss: ["https://www.ukrinform.ua/rss/block-lastnews"]
     },
 
     "France": {
       ruName: "🇫🇷 Франция",
       hashtag: "#Франция",
       official: [
-        { name: "AFP (France-Presse)", url: "https://www.afp.com/fr" },
+        { name: "AFP (Агентство)", url: "https://www.afp.com/fr" },
         { name: "France Info", url: "https://www.francetvinfo.fr/" },
-        { name: "Le Monde", url: "https://www.lemonde.fr/" },
-        { name: "Le Figaro", url: "https://www.lefigaro.fr/" }
+        { name: "Le Monde", url: "https://www.lemonde.fr/" }
       ],
       alternative: [
-        { name: "Mediapart (расследования)", url: "https://www.mediapart.fr/" },
-        { name: "France 24", url: "https://www.france24.com/fr/" },
-        { name: "RFI", url: "https://www.rfi.fr/fr/" },
-        { name: "Libération", url: "https://www.liberation.fr/" }
+        { name: "Mediapart", url: "https://www.mediapart.fr/" },
+        { name: "France 24", url: "https://www.france24.com/fr/" }
       ],
-      rss: [
-        "https://www.lemonde.fr/rss/une.xml",
-        "https://www.france24.com/fr/rss"
-      ]
+      rss: ["https://www.lemonde.fr/rss/une.xml"]
     },
 
     "Germany": {
       ruName: "🇩🇪 Германия",
       hashtag: "#Германия",
       official: [
-        { name: "Tagesschau (ARD)", url: "https://www.tagesschau.de/" },
-        { name: "ZDFheute", url: "https://www.zdf.de/nachrichten" },
+        { name: "Tagesschau", url: "https://www.tagesschau.de/" },
         { name: "Der Spiegel", url: "https://www.spiegel.de/" }
       ],
       alternative: [
-        { name: "Deutsche Welle (DW)", url: "https://www.dw.com/" },
-        { name: "taz (независимая пресса)", url: "https://taz.de/" },
-        { name: "Süddeutsche Zeitung", url: "https://www.sueddeutsche.de/" }
+        { name: "Deutsche Welle (DW)", url: "https://www.dw.com/" }
       ],
-      rss: [
-        "https://www.tagesschau.de/xml/rss2/",
-        "https://rss.dw.com/xml/rss-en-ger"
-      ]
+      rss: ["https://www.tagesschau.de/xml/rss2/"]
     },
 
     "United States of America": {
       ruName: "🇺🇸 США",
       hashtag: "#США",
       official: [
-        { name: "Associated Press (AP)", url: "https://apnews.com/" },
-        { name: "NPR News", url: "https://www.npr.org/sections/news/" },
-        { name: "CBS News", url: "https://www.cbsnews.com/" }
+        { name: "Associated Press", url: "https://apnews.com/" },
+        { name: "NPR News", url: "https://www.npr.org/" }
       ],
       alternative: [
         { name: "The Intercept", url: "https://theintercept.com/" },
-        { name: "Democracy Now!", url: "https://www.democracynow.org/" },
         { name: "The Guardian US", url: "https://www.theguardian.com/us" }
       ],
-      rss: [
-        "https://feeds.npr.org/1001/rss.xml"
-      ]
+      rss: ["https://feeds.npr.org/1001/rss.xml"]
     },
 
     "United Kingdom": {
-      ruName: "🇬🇧 Великобритания",
+      ruName: "🇬🇧 Британия",
       hashtag: "#Британия",
       official: [
         { name: "BBC News UK", url: "https://www.bbc.co.uk/news" },
         { name: "Sky News", url: "https://news.sky.com/" }
       ],
       alternative: [
-        { name: "The Guardian", url: "https://www.theguardian.com/uk" },
-        { name: "OpenDemocracy", url: "https://www.opendemocracy.net/" },
-        { name: "The Independent", url: "https://www.independent.co.uk/" }
+        { name: "The Guardian", url: "https://www.theguardian.com/uk" }
       ],
-      rss: [
-        "https://feeds.bbci.co.uk/news/uk/rss.xml"
-      ]
+      rss: ["https://feeds.bbci.co.uk/news/uk/rss.xml"]
     },
 
     "Poland": {
       ruName: "🇵🇱 Польша",
       hashtag: "#Польша",
       official: [
-        { name: "PAP (Польское агентство)", url: "https://www.pap.pl/" },
-        { name: "TVN24", url: "https://tvn24.pl/" },
-        { name: "Polsat News", url: "https://www.polsatnews.pl/" }
+        { name: "PAP (Агентство)", url: "https://www.pap.pl/" },
+        { name: "TVN24", url: "https://tvn24.pl/" }
       ],
       alternative: [
-        { name: "OKO.press", url: "https://oko.press/" },
-        { name: "Notes From Poland", url: "https://notesfrompoland.com/" }
+        { name: "OKO.press", url: "https://oko.press/" }
       ],
-      rss: [
-        "https://tvn24.pl/najnowsze.xml"
-      ]
-    },
-
-    "Poland": {
-      ruName: "🇵🇱 Польша",
-      hashtag: "#Польша",
-      official: [
-        { name: "PAP (Гос. агентство)", url: "https://www.pap.pl/" },
-        { name: "TVN24", url: "https://tvn24.pl/" },
-        { name: "Polsat News", url: "https://www.polsatnews.pl/" }
-      ],
-      alternative: [
-        { name: "OKO.press (расследования)", url: "https://oko.press/" },
-        { name: "Notes From Poland", url: "https://notesfrompoland.com/" }
-      ],
-      rss: [
-        "https://tvn24.pl/najnowsze.xml"
-      ]
-    },
-
-    "Turkey": {
-      ruName: "🇹🇷 Турция",
-      hashtag: "#Турция",
-      official: [
-        { name: "Anadolu Agency (AA)", url: "https://www.aa.com.tr/" },
-        { name: "TRT Haber", url: "https://www.trthaber.com/" }
-      ],
-      alternative: [
-        { name: "Bianet (независимое)", url: "https://bianet.org/" },
-        { name: "Duvar English", url: "https://www.duvarenglish.com/" }
-      ],
-      rss: []
-    },
-
-    "Israel": {
-      ruName: "🇮🇱 Израиль",
-      hashtag: "#Израиль",
-      official: [
-        { name: "Times of Israel", url: "https://www.timesofisrael.com/" },
-        { name: "Jerusalem Post", url: "https://www.jpost.com/" },
-        { name: "Ynet News", url: "https://www.ynetnews.com/" }
-      ],
-      alternative: [
-        { name: "Haaretz", url: "https://www.haaretz.com/" },
-        { name: "+972 Magazine", url: "https://www.972mag.com/" }
-      ],
-      rss: []
-    },
-
-    "China": {
-      ruName: "🇨🇳 Китай",
-      hashtag: "#Китай",
-      official: [
-        { name: "Xinhua (Синьхуа)", url: "http://www.news.cn/english/" },
-        { name: "CGTN", url: "https://www.cgtn.com/" }
-      ],
-      alternative: [
-        { name: "South China Morning Post", url: "https://www.scmp.com/" },
-        { name: "China Digital Times", url: "https://chinadigitaltimes.net/" }
-      ],
-      rss: []
-    },
-
-    "Japan": {
-      ruName: "🇯🇵 Япония",
-      hashtag: "#Япония",
-      official: [
-        { name: "NHK World", url: "https://www3.nhk.or.jp/nhkworld/" },
-        { name: "Kyodo News", url: "https://english.kyodonews.net/" }
-      ],
-      alternative: [
-        { name: "The Japan Times", url: "https://www.japantimes.co.jp/" },
-        { name: "Asahi Shimbun", url: "https://www.asahi.com/ajw/" }
-      ],
-      rss: [
-        "https://www3.nhk.or.jp/rss/news/cat0.xml"
-      ]
+      rss: ["https://tvn24.pl/najnowsze.xml"]
     }
   };
 
-  /* ГЛОБАЛЬНЫЕ ИСТОЧНИКИ (КОГДА НИ ОДНА СТРАНА НЕ ВЫБРАНА) */
   const GLOBAL_DB = {
-    ruName: "🌍 Мировые агентства",
+    ruName: "🌍 Мировые СМИ",
     hashtag: "#Мир",
     official: [
-      { name: "Reuters World", url: "https://www.reuters.com/world/" },
-      { name: "Associated Press", url: "https://apnews.com/world-news" },
-      { name: "BBC World", url: "https://www.bbc.com/news/world" },
-      { name: "Новости ООН", url: "https://news.un.org/ru/" }
+      { name: "Reuters", url: "https://www.reuters.com/" },
+      { name: "Associated Press", url: "https://apnews.com/" },
+      { name: "BBC World", url: "https://www.bbc.com/news/world" }
     ],
     alternative: [
       { name: "Al Jazeera", url: "https://www.aljazeera.com/" },
-      { name: "DW на русском", url: "https://www.dw.com/ru/" },
-      { name: "Euronews RU", url: "https://ru.euronews.com/" },
-      { name: "RFI на русском", url: "https://www.rfi.fr/ru/" }
+      { name: "DW на русском", url: "https://www.dw.com/ru/" }
     ],
-    rss: [
-      "https://feeds.bbci.co.uk/news/world/rss.xml",
-      "https://ru.euronews.com/rss"
-    ]
+    rss: ["https://feeds.bbci.co.uk/news/world/rss.xml"]
   };
-
-  /* ============================================================================ */
 
   let selectedCountry = null;
   let countriesFeatures = [];
@@ -567,14 +409,9 @@
   }
 
   function getDomain(url) {
-    try {
-      return new URL(url).hostname.replace("www.", "");
-    } catch {
-      return "ссылка";
-    }
+    try { return new URL(url).hostname.replace("www.", ""); } catch { return "сайт"; }
   }
 
-  // Отрисовка кнопок со ссылками на сайты выбранной страны
   function renderCountryLinks() {
     const officialBox = document.getElementById("official-sites-list");
     const altBox = document.getElementById("alt-sites-list");
@@ -582,30 +419,24 @@
     const tagEl = document.getElementById("current-hashtag");
 
     let data = null;
-
     if (!selectedCountry) {
       data = GLOBAL_DB;
     } else if (MY_COUNTRIES_DB[selectedCountry]) {
       data = MY_COUNTRIES_DB[selectedCountry];
     } else {
-      // Если страны ещё нет в ручной базе MY_COUNTRIES_DB — генерируем прямые рабочие ссылки на её СМИ
       const q = encodeURIComponent(selectedCountry);
       data = {
         ruName: `📍 ${selectedCountry}`,
         hashtag: `#${selectedCountry.replace(/[^a-zA-Zа-яА-Я0-9]/g, "")}`,
         official: [
-          { name: `Google News: ${selectedCountry}`, url: `https://news.google.com/search?q=${q}` },
-          { name: `Reuters: ${selectedCountry}`, url: `https://www.reuters.com/site-search/?query=${q}` },
-          { name: `AP News: ${selectedCountry}`, url: `https://apnews.com/search?q=${q}` }
+          { name: `Google News (${selectedCountry})`, url: `https://news.google.com/search?q=${q}` },
+          { name: `Reuters (${selectedCountry})`, url: `https://www.reuters.com/site-search/?query=${q}` }
         ],
         alternative: [
-          { name: `BBC: ${selectedCountry}`, url: `https://www.bbc.co.uk/search?q=${q}` },
-          { name: `Al Jazeera: ${selectedCountry}`, url: `https://www.aljazeera.com/search/${q}` },
-          { name: `DW: ${selectedCountry}`, url: `https://www.dw.com/search/?languageCode=en&item=${q}` }
+          { name: `BBC (${selectedCountry})`, url: `https://www.bbc.co.uk/search?q=${q}` },
+          { name: `Al Jazeera (${selectedCountry})`, url: `https://www.aljazeera.com/search/${q}` }
         ],
-        rss: [
-          `https://news.google.com/rss/search?q=${q}&hl=en&gl=US&ceid=US:en`
-        ]
+        rss: [`https://news.google.com/rss/search?q=${q}&hl=en&gl=US&ceid=US:en`]
       };
     }
 
@@ -614,35 +445,28 @@
 
     officialBox.innerHTML = data.official.map(site => `
       <a class="site-link site-official" href="${site.url}" target="_blank" rel="noopener">
-        <div>
-          <span>${site.name}</span>
-          <span class="site-domain">${getDomain(site.url)}</span>
-        </div>
-        <span>↗</span>
+        <span>${site.name}</span>
+        <span class="site-domain">${getDomain(site.url)} ↗</span>
       </a>
     `).join("");
 
     altBox.innerHTML = data.alternative.map(site => `
       <a class="site-link site-alt" href="${site.url}" target="_blank" rel="noopener">
-        <div>
-          <span>${site.name}</span>
-          <span class="site-domain">${getDomain(site.url)}</span>
-        </div>
-        <span>↗</span>
+        <span>${site.name}</span>
+        <span class="site-domain">${getDomain(site.url)} ↗</span>
       </a>
     `).join("");
 
     loadRSSFeed(data.rss || [], data.hashtag);
   }
 
-  // Подгрузка последних заголовков по RSS (если доступны)
   async function loadRSSFeed(rssUrls, hashtag) {
     const feedBox = document.getElementById("news-feed-container");
     const statusEl = document.getElementById("feed-status");
 
     if (!rssUrls || rssUrls.length === 0) {
-      statusEl.textContent = "Открывайте сайты выше ☝️";
-      feedBox.innerHTML = `<div style="font-size:12px;color:#8b949e;">Для этой страны настроены прямые кнопки сайтов выше. Вы можете добавить RSS-ленту в блок MY_COUNTRIES_DB в коде.</div>`;
+      statusEl.textContent = "Готово";
+      feedBox.innerHTML = `<div style="font-size:12px;color:#8b949e;padding:6px;">Используйте ссылки на официальные сайты выше ☝️</div>`;
       return;
     }
 
@@ -655,34 +479,26 @@
         const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
         const json = await res.json();
         if (json.status === "ok" && Array.isArray(json.items)) {
-          json.items.slice(0, 6).forEach(item => {
-            allItems.push({
-              title: item.title,
-              link: item.link,
-              source: json.feed?.title || getDomain(url)
-            });
+          json.items.slice(0, 5).forEach(item => {
+            allItems.push({ title: item.title, link: item.link, source: json.feed?.title || getDomain(url) });
           });
         }
       } catch (e) {}
     }
 
     if (allItems.length === 0) {
-      statusEl.textContent = "Прямой доступ через сайты выше";
-      feedBox.innerHTML = `<div style="font-size:12px;color:#8b949e;">Автолента временно ограничена сервером — нажимайте на кнопки официальных сайтов выше, чтобы открыть новости напрямую.</div>`;
+      statusEl.textContent = "Доступ через сайты";
+      feedBox.innerHTML = `<div style="font-size:12px;color:#8b949e;padding:6px;">Нажмите на любой официальный сайт выше, чтобы открыть свежие новости.</div>`;
       return;
     }
 
-    statusEl.textContent = `Найдено: ${allItems.length}`;
+    statusEl.textContent = `Сводки: ${allItems.length}`;
     allItems.forEach(item => {
       const div = document.createElement("div");
       div.className = "news-item";
       div.innerHTML = `
-        <div class="news-item-top">
-          <span>${item.source}</span>
-        </div>
         <a class="news-item-title" href="${item.link}" target="_blank" rel="noopener">${item.title}</a>
         <div class="news-actions">
-          <button class="btn-draft-add">+ В черновик</button>
           <button class="btn-tg-small">📋 В TG</button>
         </div>
       `;
@@ -690,47 +506,27 @@
       div.querySelector(".btn-tg-small").addEventListener("click", () => {
         const post = `⚡️ ${item.title}\n\n🔗 ${item.link}\n\n${hashtag}`;
         navigator.clipboard.writeText(post);
-        showToast("✅ Пост скопирован для Telegram!");
-      });
-
-      div.querySelector(".btn-draft-add").addEventListener("click", () => {
-        const draft = document.getElementById("tg-draft");
-        draft.value += (draft.value ? "\n\n" : "") + `⚡️ ${item.title}\n${item.link}`;
-        showToast("Добавлено в черновик");
+        showToast("✅ Пост скопирован для TG!");
       });
 
       feedBox.appendChild(div);
     });
   }
 
-  // Инициализация 3D-планеты Земля
   const world = Globe()(document.getElementById("globe-container"))
     .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
     .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
     .backgroundImageUrl("https://unpkg.com/three-globe/example/img/night-sky.png")
     .lineHoverPrecision(0)
     .polygonAltitude(d => (d.properties.ADMIN === selectedCountry ? 0.05 : 0.01))
-    .polygonCapColor(d =>
-      d.properties.ADMIN === selectedCountry
-        ? "rgba(56, 189, 248, 0.55)"
-        : "rgba(30, 41, 59, 0.25)"
-    )
+    .polygonCapColor(d => d.properties.ADMIN === selectedCountry ? "rgba(56, 189, 248, 0.55)" : "rgba(30, 41, 59, 0.25)")
     .polygonSideColor(() => "rgba(56, 189, 248, 0.15)")
-    .polygonStrokeColor(d =>
-      d.properties.ADMIN === selectedCountry ? "#38bdf8" : "rgba(148, 163, 184, 0.35)"
-    )
+    .polygonStrokeColor(d => d.properties.ADMIN === selectedCountry ? "#38bdf8" : "rgba(148, 163, 184, 0.35)")
     .polygonLabel(({ properties: d }) => {
       const custom = MY_COUNTRIES_DB[d.ADMIN];
-      return `
-        <div style="background:rgba(13,17,23,0.95);padding:6px 10px;border-radius:6px;border:1px solid #38bdf8;font-size:12px;">
-          <b>${custom ? custom.ruName : d.ADMIN}</b><br/>
-          <span style="color:#94a3b8;font-size:11px;">Нажмите для открытия сайтов СМИ</span>
-        </div>
-      `;
+      return `<div style="background:rgba(13,17,23,0.95);padding:6px 10px;border-radius:6px;border:1px solid #38bdf8;font-size:12px;"><b>${custom ? custom.ruName : d.ADMIN}</b></div>`;
     })
-    .onPolygonClick(polygon => {
-      selectCountry(polygon.properties.ADMIN, polygon);
-    })
+    .onPolygonClick(polygon => { selectCountry(polygon.properties.ADMIN, polygon); })
     .onGlobeClick(() => {
       const now = Date.now();
       if (now - lastClickTime < 350) resetToGlobal();
@@ -740,15 +536,11 @@
   world.controls().autoRotate = true;
   world.controls().autoRotateSpeed = 0.4;
 
-  // Загрузка границ стран (Крым в составе Украины)
   fetch("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson")
     .then(res => res.json())
     .then(countries => {
       const ukraine = countries.features.find(f => f.properties.ADMIN === "Ukraine");
-      const crimea = countries.features.find(f =>
-        (f.properties.NAME && f.properties.NAME.includes("Crimea")) ||
-        (f.properties.ADMIN && f.properties.ADMIN.includes("Crimea"))
-      );
+      const crimea = countries.features.find(f => (f.properties.NAME && f.properties.NAME.includes("Crimea")) || (f.properties.ADMIN && f.properties.ADMIN.includes("Crimea")));
       if (ukraine && crimea) {
         crimea.properties.ADMIN = "Ukraine";
         crimea.properties.NAME = "Ukraine";
@@ -768,7 +560,6 @@
   function applyCountries(features) {
     countriesFeatures = features.filter(d => d.properties.ISO_A2 !== "AQ");
     world.polygonsData(countriesFeatures);
-
     const datalist = document.getElementById("countries-datalist");
     countriesFeatures.forEach(f => {
       const opt = document.createElement("option");
@@ -786,10 +577,7 @@
     if (featureObj && featureObj.bbox) {
       const [minLng, minLat, maxLng, maxLat] = featureObj.bbox;
       world.pointOfView({ lat: (minLat + maxLat) / 2, lng: (minLng + maxLng) / 2, altitude: 1.4 }, 1000);
-    } else if (countryName === "Ukraine") {
-      world.pointOfView({ lat: 48.5, lng: 31.5, altitude: 1.2 }, 1000);
     }
-
     renderCountryLinks();
   }
 
@@ -803,19 +591,17 @@
   }
 
   document.getElementById("btn-world").addEventListener("click", resetToGlobal);
-
   document.getElementById("country-search").addEventListener("change", e => {
     const val = e.target.value.trim();
     const found = countriesFeatures.find(f => f.properties.ADMIN.toLowerCase() === val.toLowerCase());
     if (found) selectCountry(found.properties.ADMIN, found);
   });
 
-  // Кнопки черновика Telegram
   document.getElementById("btn-copy-post").addEventListener("click", () => {
     const draft = document.getElementById("tg-draft").value.trim();
     if (!draft) return;
     navigator.clipboard.writeText(draft);
-    showToast("✅ Готовый пост скопирован для Telegram!");
+    showToast("✅ Скопировано в буфер!");
   });
 
   document.getElementById("btn-add-tag").addEventListener("click", () => {
@@ -824,11 +610,8 @@
     draft.value += (draft.value ? `\n\n${tag}` : tag);
   });
 
-  document.getElementById("btn-clear").addEventListener("click", () => {
-    document.getElementById("tg-draft").value = "";
-  });
+  document.getElementById("btn-clear").addEventListener("click", () => { document.getElementById("tg-draft").value = ""; });
 
-  // Первый запуск
   renderCountryLinks();
 </script>
 </body>

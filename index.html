@@ -159,34 +159,24 @@
     .site-alt:hover { background: rgba(217, 119, 6, 0.35); color: #fff; }
     .site-domain { font-size: 11px; opacity: 0.8; font-weight: 400; }
 
-    /* Карточки новостей */
+    /* Карточки быстрых ссылок на ленты */
     .news-card {
       background: #161b22;
       border: 1px solid #262c36;
       border-radius: 8px;
-      padding: 10px;
+      padding: 12px;
       margin-bottom: 8px;
     }
     .news-title {
-      color: #f0f6fc;
+      color: #38bdf8;
       text-decoration: none;
-      font-size: 13px;
+      font-size: 13.5px;
+      font-weight: 600;
       line-height: 1.4;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
-    .news-title:hover { color: #38bdf8; }
-    .news-actions { display: flex; gap: 6px; justify-content: flex-end; }
-    .btn-tg-small {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-      border: 1px solid rgba(34, 197, 94, 0.35);
-      padding: 4px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    .news-title:hover { text-decoration: underline; }
 
     /* Черновик */
     .tg-composer {
@@ -216,6 +206,7 @@
       font-weight: 600;
       padding: 7px 12px;
       border-radius: 8px;
+      cursor: pointer;
     }
 
     #toast {
@@ -261,25 +252,22 @@
   </div>
 
   <div class="workspace-scroll">
-    <!-- 1. Официальные сайты (Отображаются мгновенно при клике на страну!) -->
+    <!-- 1. Быстрый переход к свежим лентам новостей страны -->
+    <div class="section-box">
+      <div class="section-title"><span>⚡️ Ленты и поисковые сводки новостей</span></div>
+      <div id="news-feeds-list"></div>
+    </div>
+
+    <!-- 2. Официальные сайты -->
     <div class="section-box">
       <div class="section-title"><span>🏛 Официальные / Родные сайты СМИ</span></div>
       <div class="sites-grid" id="official-sites-list"></div>
     </div>
 
-    <!-- 2. Альтернативные сайты -->
+    <!-- 3. Альтернативные сайты -->
     <div class="section-box">
       <div class="section-title"><span>🔍 Альтернативные источники</span></div>
       <div class="sites-grid" id="alt-sites-list"></div>
-    </div>
-
-    <!-- 3. Последние новости / быстрый поиск -->
-    <div class="section-box">
-      <div class="section-title">
-        <span>⚡️ Сводка новостей</span>
-        <span id="feed-status" style="font-weight:400;font-size:11px;">Готово</span>
-      </div>
-      <div id="news-feed-container"></div>
     </div>
   </div>
 
@@ -408,11 +396,11 @@
     try { return new URL(url).hostname.replace("www.", ""); } catch { return "сайт"; }
   }
 
-  // Главная функция обновления интерфейса
+  // Обновление всей панели при клике на страну
   function updateEditorPanel() {
     const officialBox = document.getElementById("official-sites-list");
     const altBox = document.getElementById("alt-sites-list");
-    const feedBox = document.getElementById("news-feed-container");
+    const feedsBox = document.getElementById("news-feeds-list");
     const titleEl = document.getElementById("current-region");
     const tagEl = document.getElementById("current-hashtag");
 
@@ -442,7 +430,18 @@
     titleEl.textContent = data.ruName;
     tagEl.textContent = data.hashtag;
 
-    // 1. Рендерим официальные сайты (гарантированно появляются!)
+    // 1. Ссылки на ленты и поисковые сводки новостей
+    const searchStr = selectedCountry ? selectedCountry : "world news";
+    feedsBox.innerHTML = `
+      <div class="news-card">
+        <a class="news-title" href="https://news.google.com/search?q=${encodeURIComponent(searchStr)}" target="_blank" rel="noopener">
+          ⚡️ Актуальная лента Google News (${searchStr}) ↗
+        </a>
+        <div style="font-size:11px;color:#8b949e;margin-top:2px;">Мгновенный переход к последним событиям и статьям в реальном времени.</div>
+      </div>
+    `;
+
+    // 2. Официальные сайты СМИ
     officialBox.innerHTML = data.official.map(site => `
       <a class="site-link site-official" href="${site.url}" target="_blank" rel="noopener">
         <span>${site.name}</span>
@@ -450,25 +449,13 @@
       </a>
     `).join("");
 
-    // 2. Рендерим альтернативные сайты (гарантированно появляются!)
+    // 3. Альтернативные источники
     altBox.innerHTML = data.alternative.map(site => `
       <a class="site-link site-alt" href="${site.url}" target="_blank" rel="noopener">
         <span>${site.name}</span>
         <span class="site-domain">${getDomain(site.url)} ↗</span>
       </a>
     `).join("");
-
-    // 3. Быстрый поисковый блок новостей (работает без сбоев и CORS-ошибок)
-    const searchQuery = selectedCountry ? selectedCountry : "world news";
-    const searchUrl = `https://news.google.com/search?q=${encodeURIComponent(searchQuery)}`;
-    
-    feedBox.innerHTML = `
-      <div class="news-card">
-        <div style="font-size:12px;color:#94a3b8;margin-bottom:6px;">Свежие материалы по запросу: <b>${searchQuery}</b></div>
-        <a class="news-title" href="${searchUrl}" target="_blank" rel="noopener" style="color:#38bdf8;font-weight:600;">🔍 Открыть ленту новостей Google (${searchQuery}) ↗</a>
-        <div style="font-size:11px;color:#8b949e;margin-top:4px;">Нажми, чтобы перейти к списку актуальных новостей в реальном времени.</div>
-      </div>
-    `;
   }
 
   // Инициализация 3D-глобуса
